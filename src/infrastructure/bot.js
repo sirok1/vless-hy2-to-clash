@@ -10,13 +10,6 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 const logger = createLogger("TelegramBot");
 
-function escapeHtml(text) {
-  return text
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
 class ClashBotApp {
   constructor() {
     const token = process.env.BOT_TOKEN;
@@ -55,10 +48,14 @@ class ClashBotApp {
       try {
         const vlessData = this.parser.parse(text);
         const clashConfig = this.generator.generate(vlessData);
+        const configFile = {
+          source: Buffer.from(clashConfig, "utf8"),
+          filename: "clash-config.yaml"
+        };
 
-        await ctx.replyWithHTML(
-          `<pre><code class="language-yaml">${escapeHtml(clashConfig)}</code></pre>`
-        );
+        await ctx.replyWithDocument(configFile, {
+          caption: "Готовый Clash-конфиг."
+        });
         logger.info(`Конфигурация успешно отправлена пользователю ${ctx.from.id}`);
       } catch (error) {
         logger.warn(`Ошибка обработки для ${ctx.from.id}: ${error.message}`);
