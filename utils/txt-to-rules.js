@@ -8,7 +8,7 @@ const lines = fs.readFileSync(inputFile, "utf-8").split("\n");
 const result = lines
   .map((line) => line.trim())
   .filter((line) => line && !line.startsWith("#"))
-  .map((domain) => `- DOMAIN-SUFFIX,${domain},DIRECT`)
+  .map((domain) => `DOMAIN-SUFFIX,${domain},DIRECT`)
   .join("\n");
 
 fs.writeFileSync(outputFile, result, "utf-8");

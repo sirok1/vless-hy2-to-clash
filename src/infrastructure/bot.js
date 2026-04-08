@@ -29,16 +29,16 @@ class ClashBotApp {
     this.bot.start(async (ctx) => {
       logger.info(`Пользователь ${ctx.from.id} нажал /start`);
       await ctx.reply(
-        "Привет! Пришли мне VLESS-ссылку, и я создам для тебя Clash-конфигурацию."
+        "Привет! Пришли мне ссылку vless:// или hy2://, и я соберу Clash-конфиг."
       );
     });
 
     this.bot.on("text", async (ctx) => {
       const text = (ctx.message.text || "").trim();
 
-      if (!text.includes("vless://")) {
+      if (!text.includes("vless://") && !text.includes("hy2://") && !text.includes("hysteria2://")) {
         await ctx.reply(
-          "Пожалуйста, отправь корректную ссылку, начинающуюся с vless://"
+          "Пожалуйста, отправь корректную ссылку, начинающуюся с vless:// или hy2://"
         );
         return;
       }
@@ -46,8 +46,8 @@ class ClashBotApp {
       logger.info(`Получена ссылка от ${ctx.from.id}`);
 
       try {
-        const vlessData = this.parser.parse(text);
-        const clashConfig = this.generator.generate(vlessData);
+        const linkData = this.parser.parse(text);
+        const clashConfig = this.generator.generate(linkData);
         const configFile = {
           source: Buffer.from(clashConfig, "utf8"),
           filename: "clash-config.yaml"
