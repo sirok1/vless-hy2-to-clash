@@ -9,8 +9,7 @@ avito.st
 cdn-tinkoff.ru
 cdn-vk.ru
 cikrf.ru
-digital.gov.ru
-duma.gov.ru
+gov.ru
 dzen.ru
 gazeta.ru
 genproc.gov.ru
