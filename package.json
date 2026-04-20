@@ -4,7 +4,7 @@
   "description": "Telegram bot that converts VLESS links to Clash config",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node utils/txt-to-rules.js && node src/index.js",
     "check": "node --check src/index.js && node --check src/core/parser.js && node --check src/core/generator.js && node --check src/infrastructure/logger.js && node --check src/infrastructure/bot.js"
   },
   "engines": {

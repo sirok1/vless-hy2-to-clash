@@ -1,7 +1,7 @@
 const fs = require("fs");
 
-const inputFile = "whitelist.txt";
-const outputFile = "clash_rules.txt";
+const inputFile = "utils/whitelist.txt";
+const outputFile = "utils/clash_rules.txt";
 
 const lines = fs.readFileSync(inputFile, "utf-8").split("\n");
 
