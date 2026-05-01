@@ -2,9 +2,14 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const COMMON_DIRECT_RULES = [
-  "DOMAIN-SUFFIX,yanima.space,DIRECT",
-  "DOMAIN-SUFFIX,yanima.online,DIRECT",
+  "DOMAIN-SUFFIX,r1-s3.yanima.space,DIRECT",
+  "DOMAIN-SUFFIX,r2-s3.yanima.space,DIRECT",
+  "DOMAIN-SUFFIX,r3-s3.yanima.space,DIRECT",
   "DOMAIN-SUFFIX,remanga.org,DIRECT",
+  "DOMAIN-SUFFIX,hentaicdn.org,DIRECT",
+  "DOMAIN-SUFFIX,redheadsound.studio,DIRECT",
+  "DOMAIN-SUFFIX,kinescopecdn.net,DIRECT",
+  "DOMAIN-SUFFIX,animelib.org,DIRECT",
   "DOMAIN-SUFFIX,hentaicdn.org,DIRECT",
   "DOMAIN-SUFFIX,2ip.ru,DIRECT",
 ];
