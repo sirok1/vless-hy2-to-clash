@@ -68,3 +68,4 @@ datacloudmail.ru
 dns-shop.ru
 tome.ge
 boosty.to
+mos.ru
