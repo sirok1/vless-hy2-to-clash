@@ -5,6 +5,7 @@ const COMMON_DIRECT_RULES = [
   "DOMAIN-SUFFIX,r1-s3.yanima.space,DIRECT",
   "DOMAIN-SUFFIX,r2-s3.yanima.space,DIRECT",
   "DOMAIN-SUFFIX,r3-s3.yanima.space,DIRECT",
+  "DOMAIN-SUFFIX,s3.yanima.space,DIRECT",
   "DOMAIN-SUFFIX,remanga.org,DIRECT",
   "DOMAIN-SUFFIX,hentaicdn.org,DIRECT",
   "DOMAIN-SUFFIX,redheadsound.studio,DIRECT",
