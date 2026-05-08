@@ -83,13 +83,16 @@ class ClashBotApp {
           logger.info(`Конфигурация успешно отправлена пользователю ${ctx.from.id}`);
         } catch (docError) {
           logger.error(`Ошибка при отправке документа: ${docError.message}`);
-          if (clashConfig.length < 4000) {
-            logger.info("Попытка отправить конфиг текстом...");
-            await ctx.reply("Не удалось отправить файл, вот конфиг текстом:");
-            await ctx.reply(`\`\`\`yaml\n${clashConfig}\n\`\`\``, { parse_mode: "Markdown" });
-          } else {
-            throw docError;
-          }
+          
+          logger.info("Попытка отправить конфиг текстом...");
+          await ctx.reply("Не удалось отправить файл, вот конфиг текстом (может быть обрезан):");
+          
+          // Режем конфиг, если он больше лимита Telegram (4096)
+          const textConfig = clashConfig.length > 4000 
+            ? clashConfig.substring(0, 3900) + "\n... [обрезано]" 
+            : clashConfig;
+            
+          await ctx.reply(`\`\`\`yaml\n${textConfig}\n\`\`\``, { parse_mode: "Markdown" });
         }
       } catch (error) {
         logger.warn(`Ошибка обработки для ${ctx.from.id}: ${error.message}`);
