@@ -1,6 +1,6 @@
 const path = require("node:path");
 const dotenv = require("dotenv");
-const { Telegraf } = require("telegraf");
+const { Telegraf, Input } = require("telegraf");
 const { HttpsProxyAgent } = require("https-proxy-agent");
 const { SocksProxyAgent } = require("socks-proxy-agent");
 
@@ -23,7 +23,9 @@ class ClashBotApp {
     }
 
     const options = {
-      telegram: {}
+      telegram: {
+        apiTimeout: 120000
+      }
     };
 
     if (apiRoot) {
@@ -66,16 +68,16 @@ class ClashBotApp {
       logger.info(`Получена ссылка от ${ctx.from.id}`);
 
       try {
+        await ctx.reply("Обрабатываю ссылку...");
         const linkData = this.parser.parse(text);
         const clashConfig = this.generator.generate(linkData);
-        const configFile = {
-          source: Buffer.from(clashConfig, "utf8"),
-          filename: "clash-config.yaml"
-        };
 
-        await ctx.replyWithDocument(configFile, {
-          caption: "Готовый Clash-конфиг."
-        });
+        await ctx.replyWithDocument(
+          Input.fromBuffer(Buffer.from(clashConfig, "utf8"), "clash-config.yaml"),
+          {
+            caption: "Готовый Clash-конфиг."
+          }
+        );
         logger.info(`Конфигурация успешно отправлена пользователю ${ctx.from.id}`);
       } catch (error) {
         logger.warn(`Ошибка обработки для ${ctx.from.id}: ${error.message}`);
