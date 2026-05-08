@@ -23,9 +23,7 @@ class ClashBotApp {
     }
 
     const options = {
-      telegram: {
-        apiTimeout: 120000
-      }
+      telegram: {}
     };
 
     if (apiRoot) {
@@ -84,15 +82,14 @@ class ClashBotApp {
         } catch (docError) {
           logger.error(`Ошибка при отправке документа: ${docError.message}`);
           
-          logger.info("Попытка отправить конфиг текстом...");
-          await ctx.reply("Не удалось отправить файл, вот конфиг текстом (может быть обрезан):");
+          logger.info("Попытка отправить конфиг частями...");
+          await ctx.reply("⚠️ Не удалось отправить файл из-за сетевой ошибки. Отправляю текст частями:");
           
-          // Режем конфиг, если он больше лимита Telegram (4096)
-          const textConfig = clashConfig.length > 4000 
-            ? clashConfig.substring(0, 3900) + "\n... [обрезано]" 
-            : clashConfig;
-            
-          await ctx.reply(`\`\`\`yaml\n${textConfig}\n\`\`\``, { parse_mode: "Markdown" });
+          const chunkSize = 4000;
+          for (let i = 0; i < clashConfig.length; i += chunkSize) {
+            const chunk = clashConfig.substring(i, i + chunkSize);
+            await ctx.reply(`\`\`\`yaml\n${chunk}\n\`\`\``, { parse_mode: "Markdown" });
+          }
         }
       } catch (error) {
         logger.warn(`Ошибка обработки для ${ctx.from.id}: ${error.message}`);
