@@ -1,6 +1,8 @@
 const path = require("node:path");
 const dotenv = require("dotenv");
 const { Telegraf } = require("telegraf");
+const { HttpsProxyAgent } = require("https-proxy-agent");
+const { SocksProxyAgent } = require("socks-proxy-agent");
 
 const { VlessLinkParser } = require("../core/parser");
 const { ClashConfigGenerator } = require("../core/generator");
@@ -14,14 +16,26 @@ class ClashBotApp {
   constructor() {
     const token = process.env.BOT_TOKEN;
     const apiRoot = process.env.TELEGRAM_BOT_API_URL;
+    const proxyUrl = process.env.PROXY_URL;
 
     if (!token) {
       throw new Error("Переменная окружения BOT_TOKEN не задана.");
     }
 
-    const options = {};
+    const options = {
+      telegram: {}
+    };
+
     if (apiRoot) {
-      options.telegram = { apiRoot };
+      options.telegram.apiRoot = apiRoot;
+    }
+
+    if (proxyUrl) {
+      logger.info(`Использование прокси: ${proxyUrl}`);
+      const agent = proxyUrl.startsWith("socks")
+        ? new SocksProxyAgent(proxyUrl)
+        : new HttpsProxyAgent(proxyUrl);
+      options.telegram.agent = agent;
     }
 
     this.bot = new Telegraf(token, options);
