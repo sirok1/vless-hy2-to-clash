@@ -13,12 +13,18 @@ const logger = createLogger("TelegramBot");
 class ClashBotApp {
   constructor() {
     const token = process.env.BOT_TOKEN;
+    const apiRoot = process.env.TELEGRAM_BOT_API_URL;
 
     if (!token) {
       throw new Error("Переменная окружения BOT_TOKEN не задана.");
     }
 
-    this.bot = new Telegraf(token);
+    const options = {};
+    if (apiRoot) {
+      options.telegram = { apiRoot };
+    }
+
+    this.bot = new Telegraf(token, options);
     this.parser = new VlessLinkParser();
     this.generator = new ClashConfigGenerator();
 
