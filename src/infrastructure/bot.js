@@ -71,14 +71,26 @@ class ClashBotApp {
         await ctx.reply("Обрабатываю ссылку...");
         const linkData = this.parser.parse(text);
         const clashConfig = this.generator.generate(linkData);
+        logger.info(`Генерация завершена. Размер конфига: ${clashConfig.length} байт`);
 
-        await ctx.replyWithDocument(
-          Input.fromBuffer(Buffer.from(clashConfig, "utf8"), "clash-config.yaml"),
-          {
-            caption: "Готовый Clash-конфиг."
+        try {
+          await ctx.replyWithDocument(
+            Input.fromBuffer(Buffer.from(clashConfig, "utf8"), "clash-config.yaml"),
+            {
+              caption: "Готовый Clash-конфиг."
+            }
+          );
+          logger.info(`Конфигурация успешно отправлена пользователю ${ctx.from.id}`);
+        } catch (docError) {
+          logger.error(`Ошибка при отправке документа: ${docError.message}`);
+          if (clashConfig.length < 4000) {
+            logger.info("Попытка отправить конфиг текстом...");
+            await ctx.reply("Не удалось отправить файл, вот конфиг текстом:");
+            await ctx.reply(`\`\`\`yaml\n${clashConfig}\n\`\`\``, { parse_mode: "Markdown" });
+          } else {
+            throw docError;
           }
-        );
-        logger.info(`Конфигурация успешно отправлена пользователю ${ctx.from.id}`);
+        }
       } catch (error) {
         logger.warn(`Ошибка обработки для ${ctx.from.id}: ${error.message}`);
         await ctx.reply(`Ошибка: ${error.message}`);
