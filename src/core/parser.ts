@@ -185,7 +185,21 @@ class VlessLinkParser {
       throw new Error("Некорректный формат vpn:// ссылки: данные слишком короткие.");
     }
 
-    const jsonBytes = inflateSync(raw.subarray(4));
+    const text = raw.toString("utf8");
+
+    if (text.trimStart().startsWith("[Interface]")) {
+      return this.parseVpnIni(text);
+    }
+
+    let jsonBytes: Buffer;
+    try {
+      jsonBytes = inflateSync(raw.subarray(4));
+    } catch {
+      if (text.trimStart().startsWith("[")) {
+        return this.parseVpnIni(text);
+      }
+      throw new Error("Не удалось распаковать данные vpn:// ссылки.");
+    }
 
     let vpn: VpnJson;
     try {
@@ -280,6 +294,108 @@ class VlessLinkParser {
     };
   }
 
+  private parseVpnIni(text: string): AwgParsedData | Awg2ParsedData {
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+    const iface: Record<string, string> = {};
+    const peer: Record<string, string> = {};
+    let section: "interface" | "peer" | null = null;
+
+    for (const line of lines) {
+      if (line === "[Interface]") {
+        section = "interface";
+        continue;
+      }
+      if (line === "[Peer]") {
+        section = "peer";
+        continue;
+      }
+      if (line.startsWith("[") || !section) continue;
+
+      const eqIdx = line.indexOf("=");
+      if (eqIdx === -1) continue;
+
+      const key = line.slice(0, eqIdx).trim();
+      const value = line.slice(eqIdx + 1).trim();
+
+      if (section === "interface") iface[key] = value;
+      else peer[key] = value;
+    }
+
+    const endpointRaw = peer["Endpoint"] || "";
+    const [epHost, epPort] = endpointRaw.includes(":")
+      ? [endpointRaw.slice(0, endpointRaw.lastIndexOf(":")), endpointRaw.slice(endpointRaw.lastIndexOf(":") + 1)]
+      : [endpointRaw, ""];
+    const server = epHost;
+    const port = Number(epPort) || 443;
+
+    if (!server) {
+      throw new Error("Сервер не найден в vpn:// INI конфигурации.");
+    }
+
+    const ip = iface["Address"] || "";
+    if (!ip) {
+      throw new Error("IP адрес клиента не найден в vpn:// INI конфигурации.");
+    }
+
+    const h1Raw = iface["H1"] || "";
+    const h2Raw = iface["H2"] || "";
+    const h3Raw = iface["H3"] || "";
+    const h4Raw = iface["H4"] || "";
+
+    const isAllHNumeric = [h1Raw, h2Raw, h3Raw, h4Raw].every((v) => !v || /^\d+$/.test(v));
+
+    const baseFields = {
+      server,
+      port,
+      privateKey: iface["PrivateKey"] || "",
+      publicKey: peer["PublicKey"] || "",
+      ip,
+      ipv6: "",
+      preSharedKey: peer["PresharedKey"] || "",
+      reserved: [] as number[],
+      mtu: Number(iface["MTU"]) || 0,
+      persistentKeepalive: Number(peer["PersistentKeepalive"]) || 0,
+      name: isAllHNumeric ? "AWG" : "AWG 2.0",
+      jc: Number(iface["Jc"]) || 0,
+      jmin: Number(iface["Jmin"]) || 0,
+      jmax: Number(iface["Jmax"]) || 0,
+      s1: Number(iface["S1"]) || 0,
+      s2: Number(iface["S2"]) || 0,
+      s3: Number(iface["S3"]) || 0,
+      s4: Number(iface["S4"]) || 0,
+      i1: iface["I1"] || "",
+      i2: iface["I2"] || "",
+      i3: iface["I3"] || "",
+      i4: iface["I4"] || "",
+      i5: iface["I5"] || "",
+    };
+
+    if (isAllHNumeric) {
+      return {
+        protocol: "awg",
+        ...baseFields,
+        h1: Number(h1Raw) || 0,
+        h2: Number(h2Raw) || 0,
+        h3: Number(h3Raw) || 0,
+        h4: Number(h4Raw) || 0,
+        j1: iface["J1"] || "",
+        j2: iface["J2"] || "",
+        j3: iface["J3"] || "",
+        itime: Number(iface["Itime"]) || 0,
+      };
+    }
+
+    return {
+      protocol: "awg2",
+      ...baseFields,
+      h1: h1Raw,
+      h2: h2Raw,
+      h3: h3Raw,
+      h4: h4Raw,
+    };
+  }
+
   private parseVless(parsedUrl: URL): VlessParsedData {
     const uuid = decodeURIComponent(parsedUrl.username || "");
     const server = parsedUrl.hostname;
@@ -355,7 +471,7 @@ class VlessLinkParser {
       protocol: "hysteria2",
       server,
       port,
-      password: username ? `${username}:${secret}` : secret,
+      password: username && secret ? `${username}:${secret}` : (username || secret),
       sni,
       skipCertVerify: this.parseBooleanParam(parsedUrl.searchParams.get("insecure")),
       obfs,
