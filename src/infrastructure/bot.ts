@@ -56,16 +56,16 @@ class ClashBotApp {
     this.bot.command("start", async (ctx) => {
       logger.info(`Пользователь ${ctx.from?.id} нажал /start`);
       await ctx.reply(
-        "Привет! Пришли мне ссылку vless://, hy2:// или vpn://, и я соберу Clash-конфиг."
+        "Привет! Пришли мне ссылку vless://, hy2://, trojan:// или vpn://, и я соберу Clash-конфиг."
       );
     });
 
     this.bot.on("message:text", async (ctx) => {
       const text = (ctx.msg.text || "").trim();
 
-      if (!text.includes("vless://") && !text.includes("hy2://") && !text.includes("hysteria2://") && !text.includes("vpn://")) {
+      if (!text.includes("vless://") && !text.includes("hy2://") && !text.includes("hysteria2://") && !text.includes("trojan://") && !text.includes("vpn://")) {
         await ctx.reply(
-          "Пожалуйста, отправь корректную ссылку, начинающуюся с vless://, hy2:// или vpn://"
+          "Пожалуйста, отправь корректную ссылку, начинающуюся с vless://, hy2://, trojan:// или vpn://"
         );
         return;
       }

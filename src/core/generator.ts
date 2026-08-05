@@ -115,6 +115,9 @@ class ClashConfigGenerator {
     if (data.protocol === "hysteria2") {
       return data.name;
     }
+    if (data.protocol === "trojan") {
+      return data.name;
+    }
     if (data.protocol === "awg" || data.protocol === "awg2") {
       return data.name;
     }
@@ -141,6 +144,9 @@ class ClashConfigGenerator {
   private renderProxyBlock(data: ParsedData): string[] {
     if (data.protocol === "hysteria2") {
       return this.renderHysteria2Proxy(data);
+    }
+    if (data.protocol === "trojan") {
+      return this.renderTrojanProxy(data);
     }
     if (data.protocol === "awg") {
       return this.renderAwgProxy(data);
@@ -197,6 +203,44 @@ class ClashConfigGenerator {
     }
 
     lines.push(`    client-fingerprint: ${data.clientFingerprint}`);
+
+    return lines;
+  }
+
+  private renderTrojanProxy(data: Extract<ParsedData, { protocol: "trojan" }>): string[] {
+    const lines: string[] = [
+      `  - name: "${data.name}"`,
+      "    type: trojan",
+      `    server: ${data.server}`,
+      `    port: ${data.port}`,
+      `    password: "${data.password}"`,
+      "    udp: true",
+      `    sni: "${data.sni}"`,
+      `    skip-cert-verify: ${data.skipCertVerify ? "true" : "false"}`,
+      `    client-fingerprint: "${data.clientFingerprint}"`,
+    ];
+
+    if (data.network && data.network !== "tcp") {
+      lines.push(`    network: ${data.network}`);
+    }
+
+    if (data.network === "grpc" && data.grpcServiceName) {
+      lines.push("    grpc-opts:");
+      lines.push(`      grpc-service-name: "${data.grpcServiceName}"`);
+    }
+
+    if (data.security === "reality" && (data.publicKey || data.shortId || data.spiderX)) {
+      lines.push("    reality-opts:");
+      if (data.publicKey) {
+        lines.push(`      public-key: "${data.publicKey}"`);
+      }
+      if (data.shortId) {
+        lines.push(`      short-id: "${data.shortId}"`);
+      }
+      if (data.spiderX) {
+        lines.push(`      spider-x: "${data.spiderX}"`);
+      }
+    }
 
     return lines;
   }

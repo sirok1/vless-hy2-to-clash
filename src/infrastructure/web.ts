@@ -319,12 +319,13 @@ function renderPage(): string {
       <span class="protocol-tag">vless://</span>
       <span class="protocol-tag">hy2://</span>
       <span class="protocol-tag">hysteria2://</span>
+      <span class="protocol-tag">trojan://</span>
       <span class="protocol-tag">vpn://</span>
     </div>
 
     <div class="input-group">
       <label class="input-label" for="link-input">Ссылка</label>
-      <textarea id="link-input" placeholder="vless://...&#10;hy2://...&#10;vpn://..."></textarea>
+      <textarea id="link-input" placeholder="vless://...&#10;hy2://...&#10;trojan://...&#10;vpn://..."></textarea>
     </div>
 
     <button class="btn btn-primary" id="generate-btn" onclick="generate()">

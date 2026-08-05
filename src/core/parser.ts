@@ -29,6 +29,23 @@ interface Hysteria2ParsedData {
   clientFingerprint: string;
 }
 
+interface TrojanParsedData {
+  protocol: "trojan";
+  password: string;
+  server: string;
+  port: number;
+  sni: string;
+  skipCertVerify: boolean;
+  security: string;
+  network: string;
+  grpcServiceName: string;
+  publicKey: string;
+  shortId: string;
+  spiderX: string;
+  clientFingerprint: string;
+  name: string;
+}
+
 interface AwgParsedData {
   protocol: "awg";
   server: string;
@@ -95,7 +112,7 @@ interface Awg2ParsedData {
   i5: string;
 }
 
-type ParsedData = VlessParsedData | Hysteria2ParsedData | AwgParsedData | Awg2ParsedData;
+type ParsedData = VlessParsedData | Hysteria2ParsedData | TrojanParsedData | AwgParsedData | Awg2ParsedData;
 
 interface AwgJsonContainer {
   H1?: string;
@@ -172,7 +189,11 @@ class VlessLinkParser {
       return this.parseHysteria2(parsedUrl);
     }
 
-    throw new Error("Поддерживаются только ссылки vless://, hy2:// и vpn://");
+    if (parsedUrl.protocol === "trojan:") {
+      return this.parseTrojan(parsedUrl);
+    }
+
+    throw new Error("Поддерживаются только ссылки vless://, hy2://, trojan:// и vpn://");
   }
 
   private parseVpn(link: string): AwgParsedData | Awg2ParsedData {
@@ -424,6 +445,45 @@ class VlessLinkParser {
     };
   }
 
+  private parseTrojan(parsedUrl: URL): TrojanParsedData {
+    const password = decodeURIComponent(parsedUrl.username || parsedUrl.password || "");
+    const server = parsedUrl.hostname;
+    const port = Number(parsedUrl.port) || 443;
+
+    if (!password) {
+      throw new Error("Пароль Trojan не найден в ссылке.");
+    }
+
+    if (!server) {
+      throw new Error("Сервер не найден.");
+    }
+
+    const name = parsedUrl.hash
+      ? decodeURIComponent(parsedUrl.hash.slice(1))
+      : server;
+
+    const network = parsedUrl.searchParams.get("type") || "tcp";
+    const security = parsedUrl.searchParams.get("security") || "";
+    const sni = parsedUrl.searchParams.get("sni") || server;
+
+    return {
+      protocol: "trojan",
+      password,
+      server,
+      port,
+      sni,
+      skipCertVerify: this.parseBooleanParam(parsedUrl.searchParams.get("insecure")),
+      security,
+      network,
+      grpcServiceName: parsedUrl.searchParams.get("serviceName") || "",
+      publicKey: parsedUrl.searchParams.get("pbk") || "",
+      shortId: parsedUrl.searchParams.get("sid") || "",
+      spiderX: parsedUrl.searchParams.get("spx") || "",
+      clientFingerprint: parsedUrl.searchParams.get("fp") || "chrome",
+      name,
+    };
+  }
+
   private parseHysteria2(parsedUrl: URL): Hysteria2ParsedData {
     const username = decodeURIComponent(parsedUrl.username || "");
     const secret = decodeURIComponent(parsedUrl.password || "");
@@ -489,4 +549,4 @@ class VlessLinkParser {
 }
 
 export { VlessLinkParser };
-export type { VlessParsedData, Hysteria2ParsedData, AwgParsedData, Awg2ParsedData, ParsedData };
+export type { VlessParsedData, Hysteria2ParsedData, TrojanParsedData, AwgParsedData, Awg2ParsedData, ParsedData };

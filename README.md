@@ -8,17 +8,19 @@ Telegram-бот и веб-интерфейс для конвертации VPN-�
 |----------|---------------|-------------|
 | VLESS + Reality | `vless://...` | Clash (mihomo) |
 | Hysteria2 | `hy2://` / `hysteria2://` | Clash Meta (mihomo) |
+| Trojan | `trojan://...` | Clash Meta (mihomo) |
 | AmneziaWG 1.x | `vpn://` (AmneziaVPN text key) | Clash Meta (mihomo) |
 | AmneziaWG 2.0 | `vpn://` (AmneziaVPN text key) | Clash Meta (mihomo) |
 
 ## Возможности
 
-- Парсинг ссылок vless://, hy2://, hysteria2://, vpn://
+- Парсинг ссылок vless://, hy2://, hysteria2://, trojan://, vpn://
 - Генерация готового YAML-конфига для Clash/Clash Verge/mihomo
 - DNS-блок с fake-ip для Hysteria2 и AmneziaWG
 - AmneziaWG: автоматическое определение версии (1.x / 2.0) по `protocol_version`
 - AmneziaWG: извлечение ключей из `last_config` внутри vpn:// payload
 - Hysteria2: поддержка obfs (salamander), ALPN, SNI, client-fingerprint
+- Trojan: поддержка password, SNI, gRPC, Reality-параметров и client-fingerprint
 - Whitelist российских доменов + торрент-клиенты → DIRECT
 - Telegram-бот (grammY) и веб-интерфейс (Hono) запускаются вместе
 - Адаптивный UI: dark theme, glassmorphism, mobile-first
